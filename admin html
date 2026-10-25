@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Zenith Maison</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Poppins:wght@400&display=swap');
+body{font-family:'Poppins',sans-serif;background:#07050a;color:#f5f0e8;margin:0}
+.font-serif{font-family:'Cormorant Garamond',serif}
+.top-bar{border:1px solid rgba(212,175,55,.6);border-left:4px solid #d4af37;border-right:4px solid #d4af37;background:rgba(15,10,20,.95)}
+.inp{background:rgba(255,255,255,.07);border:1px solid rgba(212,175,55,.3);border-radius:6px;padding:10px 12px;color:#fff;width:100%;font-size:13px}
+.btn-gold{background:linear-gradient(90deg,#b8962f,#f7e38a,#d4af37);color:#1a1200;font-weight:700;padding:10px 20px;border-radius:6px;border:1px solid #d4af37;font-size:12px}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.25);border-radius:10px;padding:14px}
+</style>
+</head>
+<body>
+<div class="max-w-[900px] mx-auto px-3 pt-4">
+<div class="top-bar flex justify-between items-center px-5 py-3"><div><i class="fa-solid fa-crown text-[#d4af37]"></i><span class="font-serif ml-2 tracking-widest">ZENITH ADMIN</span></div><a href="./index.html" class="text-[10px] opacity-60 underline">← PUBLIC SITE</a></div>
+
+<div id="login" class="max-w-[400px] mx-auto mt-20 text-center p
