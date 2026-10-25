@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenith Vote Model 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Poppins:wght@400&display=swap');
+body{font-family:'Poppins',sans-serif;background:#07050a;color:#f5f0e8;margin:0}
+.font-serif{font-family:'Cormorant Garamond',serif}
+.top-bar{border:1px solid rgba(212,175,55,.6);border-left:4px solid #d4af37;border-right:4px solid #d4af37;background:rgba(15,10,20,.95);backdrop-filter:blur(16px)}
+.gold-frame{padding:3px;background:linear-gradient(180deg,#d4af37,#8a6a1a,#f7e38a,#b8962f);border-radius:6px;box-shadow:0 0 30px rgba(212,175,55,.25)}
+.gold-inner{background:#0a080f;border-radius:4px;overflow:hidden;position:relative;padding:3px}
+.gold-inner:before{content:'';position:absolute;inset:8px;border:1px solid rgba(212,175,55,.35);border-radius:3px;z-index:2;pointer-events:none}
+.card-img{height:420px;position:relative;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.card-img:after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent 60%)}
+.card-content{position:absolute;bottom:0;left:0;right:0;padding:20px 16px;text-align:center;z-index:3}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:19px;color:#f7e8c0;letter-spacing:.04em}
+.card-votes{font-size:11px;opacity:.7;letter-spacing:.12em;margin-top:2px}
+.btn-vote{background:linear-gradient(90deg,#b8962f,#f7e38a,#d4af37);color:#1a1200;font-weight:700;font-size:12px;padding:10px 28px;border-radius:4px;border:1px solid #d4af37}
+.purple-glow{position:absolute;width:100px;height:180px;background:radial-gradient(ellipse,rgba(168,85,247,.5),transparent 70%);filter:blur(12px);z-index:1}
+</style>
+</head>
+<body>
+<div style="position:fixed;inset:0;z-index:-1;background:radial-gradient(600px 400px at 0% 20%,rgba(212,175,55,.22),transparent),radial-gradient(700px 500px at 100% 15%,rgba(168,85,247,.18),transparent)"></div>
+<div class="max-w-[1280px] mx-auto px-3 pt-4">
+<div class="top-bar flex justify-between items-center px-5 py-3"><div class="flex gap-3 items-center"><i class="fa-solid fa-crown text-[#d4af37]"></i><span class="font-serif text-[20px] tracking-widest">ZENITH</span><span class="text-[#d4af37] mx-2">|</span><span class="text-[11px] tracking-[0.2em] opacity-70">VOTING</span></div><div class="text-[10px] tracking-widest opacity-50">LIVE <span class="w-2 h-2 bg-green-400 rounded-full inline-block animate-pulse"></span></div></div>
+<div class="text-center pt-14 pb-10"><h1 class="font-serif text-[28px] md:text-[44px]" style="color:#f7e8c0">FASHION VOTE • SEASON VII 2026</h1><p class="mt-2 text-[11px] tracking-[0.2em] opacity-60">CAST YOUR VOTE FOR THIS SEASON'S ICON • VOTING CLOSES DEC 12 • 23:59 WAT</p><p class="mt-4 text-[11px] tracking-[0.3em] opacity-80"><span class="text-[#d4af37]">—</span> EDITOR'S CHOICE — NOMINEES <span class="text-[#d4af37]">—</span></p></div>
+<div id="grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 px-2 md:px-8 pb-10"></div>
+<div class="border border-[#d4af37]/40 bg-black/50 backdrop-blur flex justify-between px-6 py-3 text-[10px] tracking-[0.2em] mb-10"><span class="opacity-60">TRUSTED • EXCLUSIVE • LUXURY</span><span>ZENITH MODEL 2026</span></div>
+<div class="max-w-3xl mx-auto pb-20"><div class="bg-black/60 border border-[#d4af37]/30 rounded-xl p-5"><h3 class="font-serif tracking-widest mb-3">LEADERBOARD</h3><div id="leaderList" class="space-y-2 text-sm"></div></div></div>
+</div>
+<script>
+const DATA=[
+{name:"CELESTE ROUGE",photo:"https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&q=80",votes:12400},
+{name:"NOIR VALENTINE",photo:"https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&q=80",votes:9800},
+{name:"AURELIA BLACK",photo:"https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?w=600&q=80",votes:11200}
+];
+let list=[];
+function load(){let s=localStorage.getItem('zenith_v7');if(s){list=JSON.parse(s)}else{list=JSON.parse(JSON.stringify(DATA));save()}}
+function save(){localStorage.setItem('zenith_v7',JSON.stringify(list))}
+function fmt(n){return n>=1000?(n/1000).toFixed(1)+'K VOTES':n+' VOTES'}
+function render(){
+let g=document.getElementById('grid');g.innerHTML='';
+list.forEach((c,i)=>{
+g.innerHTML+=`<div class="gold-frame"><div class="gold-inner"><div class="purple-glow" style="left:-10px;top:40%"></div><div class="purple-glow" style="right:-10px;top:40%"></div><div class="card-img"><img src="${c.photo}"><div class="card-content"><div class="card-name">${c.name}</div><div class="card-votes">${fmt(c.votes)}</div><button onclick="vote(${i})" class="btn-vote mt-3">VOTE NOW</button></div></div></div></div>`;
+});
+let l=document.getElementById('leaderList');let sorted=[...list].sort((a,b)=>b.votes-a.votes);
+l.innerHTML=sorted.map((c,k)=>`<div class="flex justify-between py-2 border-b border-white/10"><span>#${k+1} ${c.name}</span><span class="text-[#d4af37] font-bold">${fmt(c.votes)}</span></div>`).join('');
+}
+function vote(i){if(localStorage.getItem('zv_'+i)){alert('Already voted');return}list[i].votes++;save();localStorage.setItem('zv_'+i,'1');render()}
+load();render();
+</script>
+</body>
+  </html>
