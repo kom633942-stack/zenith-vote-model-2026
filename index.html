@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENITH ADMIN - 2026/2027</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a0a0a;color:#fff;padding:15px}
+h1{font-family:Georgia,serif;letter-spacing:3px;text-align:center;margin:15px 0;font-size:22px}
+.box{background:#111;border:1px solid #333;padding:15px;margin:0 auto 20px;max-width:500px}
+.box input, .box select{width:100%;padding:12px;background:#000;border:1px solid #333;color:#fff;margin:6px 0;font-size:13px}
+.box label{font-size:10px;color:#888;letter-spacing:1px;margin-top:8px;display:block}
+.btn-gold{background:#c9a86a;color:#000;border:none;width:100%;padding:13px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;max-width:1000px;margin:0 auto}
+.card{background:#111;border:1px solid #222;text-align:center;overflow:hidden;padding-bottom:8px}
+.card img{width:100%;height:160px;object-fit:cover}
+.card small{color:#c9a86a;font-size:10px}
+.card button{background:#222;color:#fff;border:1px solid #333;padding:6px 10px;font-size:10px;margin:4px;cursor:pointer}
+.wallet{background:#000;border:1px dashed #c9a86a;padding:10px;margin:10px 0;font-size:11px;word-break:break-all}
+</style>
+</head>
+<body>
+<h1>ZENITH ADMIN 2026/2027</h1>
+
+<div class="box">
+<h3 style="font-size:14px;letter-spacing:1px;margin-bottom:10px">ADD NEW CONTESTANT</h3>
+<label>Contestant Code * (e.g. Saya463)</label>
+<input id="code" placeholder="Saya463">
+<label>Full Name *</label>
+<input id="name" placeholder="Saya Wifey">
+<label>Description (e.g. Japanese - Runway)</label>
+<input id="desc" placeholder="Japanese - Runway Contestant">
+<label>Starting Votes</label>
+<input id="votes" type="number" value="0">
+<label>Contestant Image *</label>
+<input id="imgFile" type="file" accept="image/*">
+<p style="font-size:10px;color:#777;margin:5px 0">Image will be compressed and saved to Firebase</p>
+<button class="btn-gold" onclick="addModel()">ADD MODEL LIVE - CLIENT WILL SEE INSTANTLY</button>
+<p id="status" style="font-size:11px;color:#c9a86a;text-align:center;margin-top:10px"></p>
+<div class="wallet"><b>Current BTC Wallet:</b> bc1q4h7gjy978am0ntv9u7wj2erhw4vv0khsmsfun4<br><b>Email:</b> Zenithmodeling1@outlook.com<br><b>Per Vote:</b> $20<br><b>Gift Card Types:</b> Amazon, Apple, Steam, eBay, Vanilla, Other (Google Play removed)<br><b>Wallet Types:</b> BTC Only</div>
+</div>
+
+<div class="box" style="max-width:1000px">
+<h3 style="font-size:14px;letter-spacing:1px;margin-bottom:10px">ALL MODELS (Static + Firebase) - <span id="count">0</span></h3>
+<div class="grid" id="grid"></div>
+</div>
+
+<div class="box" style="max-width:1000px">
+<h3 style="font-size:14px;letter-spacing:1px;margin-bottom:10px">VOTES RECEIVED (Firebase)</h3>
+<div id="votesList" style="font-size:11px;line-height:1.6"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, push, remove, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyCah_ucdI55pyBR_RJ_ILu26aSALI1rVbA",authDomain:"zenith-2026-vote.firebaseapp.com",databaseURL:"https://zenith-2026-vote-default-rtdb.firebaseio.com",projectId:"zenith-2026-vote",storageBucket:"zenith-2026-vote.firebasestorage.app",messagingSenderId:"534661022606",appId:"1:534661022606:web:31af138277cf4e88ce9adf"};
+const app=initializeApp(firebaseConfig); const db=getDatabase(app);
+
+function toB64(f){return new Promise((r,j)=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.onerror=j;rd.readAsDataURL(f);});}
+
+window.addModel=async()=>{
+ const code=document.getElementById('code').value.trim();
+ const name=document.getElementById('name').value.trim();
+ const desc=document.getElementById('desc').value.trim();
+ const votes=parseInt(document.getElementById('votes').value)||0;
+ const file=document.getElementById('imgFile').files[0];
+ const status=document.getElementById('status');
+ if(!code||!name){status.textContent='Code and Name required';return;}
+ if(!file){status.textContent='Select image';return;}
+ status.textContent='Uploading...';
+ try{
+  const img=await toB64(file);
+  await push(ref(db,'models'),{code, name, desc, votes, image:img, mainImage:img, created:Date.now()});
+  status.textContent='✅ Added! Client sees it now at homepage';
+  document.getElementById('code').value=''; document.getElementById('name').value=''; document.getElementById('desc').value=''; document.getElementById('imgFile').value='';
+ }catch(e){status.textContent='Error: '+e.message}
+};
+
+onValue(ref(db,'models'), snap=>{
+ const data=snap.val();
+ const list=data?Object.entries(data).map(([id,v])=>({id,...v})):[];
+ document.getElementById('count').textContent=list.length+' Firebase models (plus 3 static in index)';
+ const grid=document.getElementById('grid'); grid.innerHTML='';
+ list.forEach(m=>{
+  const d=document.createElement('div'); d.className='card';
+  d.innerHTML=`<img src="${m.mainImage||m.image}"><div style="padding:5px"><b style="font-size:12px">${m.name}</b><br><small>${m.code}</small><br><span style="font-size:10px;color:#888">${m.votes||0} votes</span><br><button onclick="delModel('${m.id}')">DELETE</button></div>`;
+  grid.appendChild(d);
+ });
+});
+
+onValue(ref(db,'votes'), snap=>{
+ const data=snap.val();
+ const list=data?Object.entries(data).map(([id,v])=>({id,...v})).reverse():[];
+ const el=document.getElementById('votesList');
+ if(list.length===0){el.innerHTML='No votes yet'; return;}
+ el.innerHTML=list.map(v=>`<div style="border-bottom:1px solid #222;padding:8px 0"><b>${v.modelName} (${v.contestantCode})</b> - ${v.qty} votes = $${v.total} - ${v.voterEmail}<br>Pay: ${v.payMode} | Gift: ${v.giftType||''} ${v.giftCode||''} | BTC Txn: ${v.cryptoTxn||''} | Wallet: ${v.wallet||'bc1q4h7gjy978am0ntv9u7wj2erhw4vv0khsmsfun4'}<br><span style="color:#555">${new Date(v.created).toLocaleString()}</span> <button onclick="delVote('${v.id}')" style="margin-left:10px;background:#300;color:#fff;border:1px solid #500;padding:2px 6px;font-size:9px">DELETE VOTE</button></div>`).join('');
+});
+
+window.delModel=(id)=>{if(confirm('Delete this model? Client will no longer see it')) remove(ref(db,'models/'+id));}
+window.delVote=(id)=>{if(confirm('Delete vote?')) remove(ref(db,'votes/'+id));}
+</script>
+</body>
+</html>
+Edit it urself
