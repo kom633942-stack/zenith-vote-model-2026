@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENITH ADMIN PRO</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a0a0a;color:#fff;padding:12px}
+h1{font-family:Georgia,serif;letter-spacing:3px;text-align:center;margin:12px 0;font-size:20px}
+.box{background:#111;border:1px solid #333;padding:14px;margin:0 auto 15px;max-width:600px}
+.box input{width:100%;padding:11px;background:#000;border:1px solid #333;color:#fff;margin:5px 0;font-size:13px}
+.box label{font-size:10px;color:#888;margin-top:6px;display:block;letter-spacing:1px}
+.btn{width:100%;padding:12px;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;margin-top:8px}
+.btn-gold{background:#c9a86a;color:#000}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;max-width:1100px;margin:0 auto}
+.card{background:#111;border:1px solid #222;text-align:center;padding-bottom:10px}
+.card img{width:100%;height:170px;object-fit:cover;background:#222}
+.card button{padding:6px 8px;font-size:9px;margin:3px;border:none;cursor:pointer;font-weight:700}
+.del{background:#400;color:#ff8888;border:1px solid #600!important}
+.inc{background:#c9a86a;color:#000}
+.edit{background:#222;color:#fff;border:1px solid #444!important}
+.wallet{background:#000;border:1px dashed #c9a86a;padding:10px;margin:10px 0;font-size:11px;word-break:break-all;text-align:center}
+</style>
+</head>
+<body>
+<h1>ZENITH ADMIN - NO MORE BLACK</h1>
+
+<div class="box">
+<h3>ADD CONTESTANT</h3>
+<label>Code (Saya463)</label><input id="code" placeholder="ZEN-004">
+<label>Name</label><input id="name" placeholder="Model Name">
+<label>Description</label><input id="desc" placeholder="Country - Category">
+<label>Starting Votes</label><input id="votes" type="number" value="0">
+<label>Image</label><input id="imgFile" type="file" accept="image/*">
+<button class="btn btn-gold" onclick="addModel()">ADD - CLIENT SEES INSTANTLY</button>
+<p id="status" style="font-size:11px;color:#c9a86a;text-align:center;margin-top:8px"></p>
+<div class="wallet"><b>BTC ONLY:</b> bc1q4h7gjy978am0ntv9u7wj2erhw4vv0khsmsfun4<br><b>EMAIL:</b> Zenithmodeling1@outlook.com<br>$20/vote | Gift: Amazon, Apple, Steam, eBay, Vanilla, Other</div>
+</div>
+
+<div class="box" style="max-width:1100px">
+<h3>MANAGE - <span id="count">0</span> Firebase Models</h3>
+<div class="grid" id="grid"></div>
+</div>
+
+<div class="box" style="max-width:1100px">
+<h3>VOTES</h3>
+<div id="votesList" style="font-size:11px;line-height:1.6">Loading...</div>
+</div>
+
+<script>
+var firebaseConfig={apiKey:"AIzaSyCah_ucdI55pyBR_RJ_ILu26aSALI1rVbA",authDomain:"zenith-2026-vote.firebaseapp.com",databaseURL:"https://zenith-2026-vote-default-rtdb.firebaseio.com",projectId:"zenith-2026-vote",storageBucket:"zenith-2026-vote.firebasestorage.app",messagingSenderId:"534661022606",appId:"1:534661022606:web:31af138277cf4e88ce9adf"};
+firebase.initializeApp(firebaseConfig);
+var db=firebase.database();
+
+function toB64(f){return new Promise(function(r,j){var rd=new FileReader();rd.onload=function(e){r(e.target.result);};rd.onerror=j;rd.readAsDataURL(f);});}
+
+window.addModel=async function(){
+ var code=document.getElementById('code').value.trim();
+ var name=document.getElementById('name').value.trim();
+ var desc=document.getElementById('desc').value.trim();
+ var votes=parseInt(document.getElementById('votes').value)||0;
+ var file=document.getElementById('imgFile').files[0];
+ var s=document.getElementById('status');
+ if(!code||!name){s.textContent='Code + Name required';return;}
+ if(!file){s.textContent='Select image';return;}
+ s.textContent='Adding...';
+ try{ var img=await toB64(file); await db.ref('models').push({code:code,name:name,desc:desc,votes:votes,image:img,mainImage:img,created:Date.now()}); s.textContent='✅ Added!'; document.getElementById('code').value=''; document.getElementById('name').value=''; document.getElementById('imgFile').value=''; }catch(e){s.textContent='Error '+e.message}
+};
+
+db.ref('models').on('value', function(snap){
+ var data=snap.val();
+ var list=data?Object.keys(data).map(function(k){ var v=data[k]; v.id=k; return v;}):[];
+ document.getElementById('count').textContent=list.length;
+ var grid=document.getElementById('grid'); grid.innerHTML='';
+ list.forEach(function(m){
+  var d=document.createElement('div'); d.className='card';
+  d.innerHTML='<img src="'+(m.mainImage||m.image)+'"><div style="padding:6px"><b style="font-size:12px">'+m.name+'</b><br><small style="color:#c9a86a">'+m.code+'</small><br><b>☆ '+(m.votes||0)+' VOTES</b><div><button class="inc" onclick="incVote(\''+m.id+'\','+(m.votes||0)+',1)">+1</button><button class="inc" onclick="incVote(\''+m.id+'\','+(m.votes||0)+',5)">+5</button><button class="inc" onclick="incVote(\''+m.id+'\','+(m.votes||0)+',10)">+10</button></div><div><button class="edit" onclick="editModel(\''+m.id+'\',\''+m.code+'\',\''+m.name+'\',\''+(m.desc||'')+'\','+(m.votes||0)+')">EDIT</button><button class="del" onclick="delModel(\''+m.id+'\')">DELETE</button></div></div>';
+  grid.appendChild(d);
+ });
+});
+
+db.ref('votes').on('value', function(snap){
+ var data=snap.val();
+ var list=data?Object.keys(data).map(function(k){ var v=data[k]; v.id=k; return v;}).reverse():[];
+ var el=document.getElementById('votesList');
+ if(!list.length){el.innerHTML='No votes yet'; return;}
+ el.innerHTML=list.map(function(v){return '<div style="border-bottom:1px solid #222;padding:6px 0"><b>'+v.modelName+' ('+v.contestantCode+')</b> - '+v.qty+' = $'+v.total+' - '+v.voterEmail+' | '+v.payMode+' | BTC: bc1q4h7gjy978am0ntv9u7wj2erhw4vv0khsmsfun4 <button class="del" onclick="delVote(\''+v.id+'\')">DEL</button><br><span style="color:#555">'+new Date(v.created).toLocaleString()+'</span></div>'}).join('');
+});
+
+window.incVote=function(id,current,add){ db.ref('models/'+id).update({votes:(current||0)+add}); };
+window.delModel=function(id){ if(confirm('Delete?')) db.ref('models/'+id).remove(); };
+window.delVote=function(id){ if(confirm('Delete vote?')) db.ref('votes/'+id).remove(); };
+window.editModel=function(id,code,name,desc,votes){
+ var nCode=prompt('Edit Code',code); if(nCode===null)return;
+ var nName=prompt('Edit Name',name); if(nName===null)return;
+ var nDesc=prompt('Edit Description',desc); if(nDesc===null)return;
+ var nVotes=prompt('Edit Votes',votes); if(nVotes===null)return;
+ db.ref('models/'+id).update({code:nCode.trim(), name:nName.trim(), desc:nDesc.trim(), votes:parseInt(nVotes)||0});
+};
+</script>
+</body>
+</html>
